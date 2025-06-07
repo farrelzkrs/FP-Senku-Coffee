@@ -1,0 +1,43 @@
+body {
+    overflow-x: hidden;
+    /* Hilangkan scroll horizontal */
+}
+
+.nav-link {
+    color: rgb(0, 100, 0);
+}
+
+.nav-link:hover {
+    color: rgb(0, 0, 0) !important;
+}
+
+.nav-item.dropdown .nav-link{
+    color: rgb(0, 0, 0) !important;
+    border: 2px solid #28a745;
+    border-radius: 5px;
+    background-color: beige;
+    color: black;
+}
+
+.navbar {
+    border-bottom: 10px solid #006400;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-size: 17px;
+    font-weight: bold;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1030;
+}
+
+.navbar-nav .nav-item {
+    margin-right: 15px;
+}
+
+.navbar-logo {
+    height: 65px;
+    /* Sesuaikan tinggi logo dengan tinggi tulisan di navbar */
+    width: auto;
+    /* Menjaga proporsi gambar */
+}

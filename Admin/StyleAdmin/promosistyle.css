@@ -1,0 +1,131 @@
+body {
+    overflow-x: hidden; /* Hilangkan scroll horizontal */
+    margin: 0;  /* Hilangkan margin default */
+    padding: 0; /* Hilangkan scroll horizontal */
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+}
+
+.sidebar {
+    position: fixed;           /* Tetap di posisi kiri */
+    top: 0;           /* Posisi atas */
+    left: 0;            /* Posisi kiri */
+    height: 100vh;             /* Tinggi penuh layar */
+    width: 240px;              /* Lebar sidebar */
+    background: burlywood;     /* Warna latar sidebar */
+    border-right: 8px solid #006400; /* Garis tepi kanan sidebar */
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08); /* Bayangan sidebar */
+    z-index: 1040;             /* Di atas konten lain */
+    display: flex;
+    flex-direction: column;    /* Susun vertikal */
+    align-items: center;       /* Menu di tengah sidebar */
+    padding-top: 18px;         /* Jarak atas sidebar */
+}
+
+.sidebar .navbar-logo {
+    height: 65px;           /* Tinggi logo sesuai dengan navbar */
+    width: auto;            /* Menjaga proporsi gambar */
+    margin-bottom: 18px;       /* Jarak bawah logo */
+}
+
+.sidebar .nav-link {
+    color: rgb(0, 100, 0);     /* Warna teks menu */
+    font-size: 15px;           /* Ukuran font menu */
+    font-weight: bold;
+    margin: 9px 0;             /* Jarak antar menu */
+    border-radius: 5px;        /* Sudut membulat */
+    width: 90%;                /* Lebar menu */
+    text-align: left;          /* Teks rata kiri */
+    padding: 7px 16px;         /* Padding dalam menu */
+    transition: background 0.2s, color 0.2s; /* Efek hover */
+    display: flex;               /* Flexbox untuk ikon dan teks */
+    align-items: center;   /* Rata tengah vertikal */
+    gap: 8px;                  /* Jarak ikon dan teks */
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+    background: beige;      /* Latar belakang saat aktif atau hover */
+    color: #006400 !important; /* Warna teks saat aktif atau hover */
+}
+
+.sidebar .nav-profil-item {
+    margin-top: 12px;          /* Jarak atas profil */
+    margin-bottom: 30px;       /* Jarak bawah profil */
+    width: 90%;           /* Lebar item profil */
+}
+
+.sidebar .nav-profil-item .nav-link {
+    display: flex;
+    align-items: center;
+    background: #fffbe6;
+    color: #006400;
+    padding: 4px 15px;
+    font-size: 15px;
+    margin-top: 8px;
+}
+
+.sidebar .nav-profil-item img {
+    width: 40px;        /* Lebar foto profil */
+    height: 40px;       /* Tinggi foto profil */
+    margin-right: 8px;         /* Jarak kanan foto profil */
+}
+
+/* Dropdown menu profil */
+.dropdown-menu-profil {
+    min-width: 222px;
+    background: #fffbe6;
+    border-radius: 8px;
+    border: 1px solid #e0cfa9;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    font-size: 15px;
+    margin-top: 8px;
+    padding: 7px 10px;
+}
+
+.dropdown-menu-profil .dropdown-item {
+    color: #006400;
+    padding: 2px 18px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Jarak antara ikon dan teks */
+    font-weight: bold; /* Tebalkan teks item dropdown */
+    font-size: 15px; /* Ukuran font item dropdown */
+}
+
+.dropdown-menu-profil .dropdown-item i {
+    font-size: 1.1em;
+    color: #006400;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+/* Gabungkan hover pada item dan ikon agar efek hover menyatu */
+.dropdown-menu-profil .dropdown-item:hover,
+.dropdown-menu-profil .dropdown-item:hover i {
+    background: #f5e6c8;
+    /* Latar belakang saat hover item dropdown */
+    color: #4e2e0e;
+    /* Warna teks & ikon saat hover */
+}
+
+.main-content {
+    margin-left: 240px;        /* Geser konten utama */
+    padding: 40px 30px 0 30px; /* Padding konten utama */
+}
+
+@media (max-width: 991px) {
+    .sidebar {
+        width: 100vw;          /* Sidebar penuh lebar */
+        height: auto;       /* Tinggi otomatis */
+        flex-direction: row;   /* Menu horizontal */
+        padding: 10px 0;   /* Padding sidebar */
+        position: relative;     /* Posisi relatif */
+    }
+
+    .main-content {
+        margin-left: 0;        /* Konten utama tidak bergeser */
+        padding: 80px 10px 0 10px; /* Padding konten utama */
+    }
+}
