@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_id'] = $id_users;
             $_SESSION['username'] = $db_username;
             $stmt->close();
-            header('Location: ../Af Login/home2.php');
+            header('Location: home.php');
             exit;
         } else {
             $error = 'Username/email atau password salah!';
@@ -112,7 +112,7 @@ body {
 <body>
     <div class="header">
         <header class="p-3">
-            <button class="btn btn-outline-success" onclick="history.back()">
+            <button type="button" class="btn btn-outline-success" onclick="if(document.referrer){history.back();}else{window.location.href='../Bf Login/home.php';}">
                 &larr; Kembali
             </button>
         </header>
@@ -131,7 +131,7 @@ body {
                 <input type="text" name="username" class="form-control" placeholder="Username atau Email" required>
                 <input type="password" name="password" class="form-control" placeholder="Password" required>
                 <button type="submit" class="btn btn-success w-100 mb-2">Masuk</button>
-                <a href="changepass.php" class="forgot-link text-decoration-none">Lupa Password?</a>
+                <a href="changepass2.php" class="forgot-link text-decoration-none">Lupa Password?</a>
             </form>
             <div class="register-section d-flex flex-column flex-sm-row justify-content-center align-items-center mt-3">
                 <span class="me-2 mb-1 mb-sm-0">Belum punya akun?</span>

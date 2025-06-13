@@ -91,6 +91,17 @@ body {
     text-align: center;
 }
 
+.header .btn-outline-success {
+    background-color: beige;
+    border: 2px solid #28a745;
+}
+
+.btn-outline-success:hover {
+    background-color: #28a745;
+    color: white;
+    border-color: #218838;
+}
+
 .brand-logo {
     width: 100px;
     margin-bottom: 18px;
@@ -118,7 +129,7 @@ body {
 <body>
     <div class="header">
         <header class="p-3">
-            <button class="btn btn-outline-success" onclick="history.back()">
+            <button type="button" class="btn btn-outline-success" onclick="if(document.referrer){history.back();}else{window.location.href='../Bf Login/home.php';}">
                 &larr; Kembali
             </button>
         </header>
@@ -141,10 +152,10 @@ body {
                 <input type="password" name="confirm_new_password" class="form-control" placeholder="Konfirmasi Password Baru">
                 <button type="submit" class="btn btn-warning w-100 mb-2">Simpan Perubahan</button>
             </form>
-            <div class="register-section d-flex flex-column flex-sm-row justify-content-center align-items-center mt-3">
+            <!-- <div class="register-section d-flex flex-column flex-sm-row justify-content-center align-items-center mt-3">
                 <span class="me-2 mb-1 mb-sm-0">Sudah ingat password?</span>
                 <a href="../Bf Login/masuk.php" class="me-2 mb-2 mb-0 register-link text-decoration-none text-primary">Masuk di sini</a>
-            </div>
+            </div> -->
         </div>
     </section>
 </body>

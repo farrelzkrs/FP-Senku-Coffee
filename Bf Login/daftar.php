@@ -79,7 +79,7 @@ body {
 <body>
 <div class="header">
         <header class="p-3">
-            <button class="btn btn-outline-success" onclick="history.back()">
+            <button type="button" class="btn btn-outline-success" onclick="if(document.referrer){history.back();}else{window.location.href='../Bf Login/home.php';}">
                 &larr; Kembali
             </button>
         </header>

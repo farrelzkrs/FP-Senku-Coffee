@@ -4,6 +4,20 @@ include '../koneksi.php';
 $success = '';
 $error = '';
 
+$user_data = ['username' => '', 'email' => ''];
+if (isset($_GET['id'])) {
+    $id_notif = intval($_GET['id']);
+    $q = $conn->prepare("SELECT u.username, u.email FROM notifpesan n JOIN users u ON n.user_id = u.id_users WHERE n.id_notif = ?");
+    $q->bind_param("i", $id_notif);
+    $q->execute();
+    $q->bind_result($uname, $umail);
+    if ($q->fetch()) {
+        $user_data['username'] = $uname;
+        $user_data['email'] = $umail;
+    }
+    $q->close();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -78,6 +92,17 @@ body {
     text-align: center;
 }
 
+.header .btn-outline-success {
+    background-color: beige;
+    border: 2px solid #28a745;
+}
+
+.btn-outline-success:hover {
+    background-color: #28a745;
+    color: white;
+    border-color: #218838;
+}
+
 .brand-logo {
     width: 100px;
     margin-bottom: 18px;
@@ -105,7 +130,7 @@ body {
 <body>
     <div class="header">
         <header class="p-3">
-            <button class="btn btn-outline-success" onclick="history.back()">
+            <button type="button" class="btn btn-outline-success" onclick="if(document.referrer){history.back();}else{window.location.href='../Bf Login/home.php';}">
                 &larr; Kembali
             </button>
         </header>
@@ -126,16 +151,20 @@ body {
                 </div>
             <?php endif; ?>
             <form action="" method="post">
-                <input type="text" name="username" class="form-control" placeholder="Username" required>
-                <input type="email" name="email" class="form-control" placeholder="Email" required>
+                <input type="text" name="username" class="form-control" placeholder="Username" required
+                    value="<?= htmlspecialchars($user_data['username']) ?>">
+                <input type="email" name="email" class="form-control" placeholder="Email" required
+                    value="<?= htmlspecialchars($user_data['email']) ?>" <?= $user_data['email'] ? 'readonly' : '' ?>>
                 <input type="password" name="new_password" class="form-control" placeholder="Password Baru" required>
                 <input type="password" name="confirm_new_password" class="form-control" placeholder="Konfirmasi Password Baru" required>
                 <button type="submit" class="btn btn-warning w-100 mb-2">Ganti Password</button>
             </form>
+            <?php if (!isset($_GET['id'])): ?>
             <div class="register-section d-flex flex-column flex-sm-row justify-content-center align-items-center mt-3">
                 <span class="me-2 mb-1 mb-sm-0">Sudah ingat password?</span>
                 <a href="../Bf Login/masuk.php" class="me-2 mb-2 mb-0 register-link text-decoration-none text-primary">Masuk di sini</a>
             </div>
+            <?php endif; ?>
         </div>
     </section>
 </body>

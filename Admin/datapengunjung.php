@@ -30,17 +30,47 @@ $per_page = 15;
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $offset = ($page - 1) * $per_page;
 
-// Hitung total data
-$total_result = $conn->query("SELECT COUNT(*) as total FROM users");
-$total_row = $total_result->fetch_assoc();
-$total_data = $total_row['total'];
-$total_result->free();
+// Search
+$search = trim($_GET['q'] ?? '');
+$where = '';
+$params = [];
+$types = '';
 
+if ($search !== '') {
+    $where = "WHERE username LIKE ? OR email LIKE ?";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+    $types = 'ss';
+}
+
+// Hitung total data
+if ($where) {
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM users $where");
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result_count = $stmt->get_result();
+    $total_row = $result_count->fetch_assoc();
+    $total_data = $total_row['total'];
+    $stmt->close();
+} else {
+    $total_result = $conn->query("SELECT COUNT(*) as total FROM users");
+    $total_row = $total_result->fetch_assoc();
+    $total_data = $total_row['total'];
+    $total_result->free();
+}
 $total_page = ceil($total_data / $per_page);
 
 // Query data sesuai halaman
-$query = "SELECT id_users, username, email, created_at FROM users ORDER BY id_users DESC LIMIT $per_page OFFSET $offset";
-$result = $conn->query($query);
+if ($where) {
+    $stmt = $conn->prepare("SELECT id_users, username, email, created_at FROM users $where ORDER BY id_users DESC LIMIT $per_page OFFSET $offset");
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+} else {
+    $query = "SELECT id_users, username, email, created_at FROM users ORDER BY id_users DESC LIMIT $per_page OFFSET $offset";
+    $result = $conn->query($query);
+}
 ?>
 
 <!DOCTYPE html>
@@ -101,6 +131,13 @@ $result = $conn->query($query);
             <?php if (!empty($pesan_error)): ?>
                 <div class="alert alert-danger text-center pesan-flash"><?= htmlspecialchars($pesan_error) ?></div>
             <?php endif; ?>
+            <form method="get" class="mb-3 d-flex" style="max-width:400px;">
+                <input type="text" name="q" class="form-control me-2" placeholder="Cari username atau email..." value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
+                <button type="submit" class="btn btn-success">Cari</button>
+                <?php if (!empty($_GET['q'])): ?>
+                    <a href="datapengunjung.php" class="btn btn-outline-secondary ms-2">Reset</a>
+                <?php endif; ?>
+            </form>
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-light">
                     <tr>
