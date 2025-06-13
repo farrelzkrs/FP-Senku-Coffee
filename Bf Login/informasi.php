@@ -22,15 +22,19 @@ include 'auth.php';
         <!-- header -->
         <?php include 'navbarbf.php'; ?>
     </div>
-    <div class="penutup">
-        <footer class="text-center mb-2 mt-3">
-            <hr>
-            <small>
-                &copy; 2025 Senku Coffee &middot;
-                Jl. Kopi No. 123, Jakarta &middot;
-                <a href="mailto:info@senkucoffee.com" class="text-decoration-none">info@senkucoffee.com</a>
-            </small>
-        </footer>
+    <main class="flex-grow-1 d-flex align-items-center justify-content-center" style="min-height:300px;">
+        <div class="text-center">
+            <h1>Selamat Datang di Senku Coffee!</h1>
+            <p>Nikmati kopi terbaik dari kami.</p>
+        </div>
+    </main>
+    <footer class="text-center mt-4 mb-2 py-3"
+        style="background:rgb(0, 0, 0); color: #fff; border-top: 10px solid #006400;">
+        &copy; 2025 Senku Coffee &middot;
+        Jl. Kopi No. 123, Jakarta &middot;
+        <a href="mailto:info@senkucoffee.com"
+            class="link-warning link-underline-opacity-25 link-underline-opacity-100-hover">info@senkucoffee.com</a>
+    </footer>
     </div>
 </body>
 
