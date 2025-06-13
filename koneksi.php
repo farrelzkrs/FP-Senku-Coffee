@@ -89,6 +89,4 @@ $conn->query("CREATE TABLE IF NOT EXISTS feedback (
   tanggal_kirim DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id_users)
 )");
-
-echo "✅ Semua tabel berhasil dibuat atau sudah ada.";
 ?>
