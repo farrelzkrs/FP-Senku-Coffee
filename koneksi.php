@@ -85,4 +85,9 @@ $conn->query("CREATE TABLE IF NOT EXISTS feedback (
   tanggal_kirim DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id_users)
 )");
+$conn->query("CREATE TABLE IF NOT EXISTS admins (
+  id_admins INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL -- simpan hash password
+)");
 ?>
