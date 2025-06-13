@@ -1,26 +1,35 @@
 <?php
-session_start();
 include '../koneksi.php';
-
-// Ambil semua permintaan user yang pending
-$q = $conn->query("SELECT n.id_notif, n.pesan, n.tipe, n.status, u.username, u.email 
-    FROM notifpesan n JOIN users u ON n.user_id = u.id_users 
-    WHERE n.status = 'pending' ORDER BY n.id_notif DESC");
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_notif'])) {
-    $id = intval($_POST['id_notif']);
-    $action = $_POST['action'] === 'approve' ? 'approved' : 'rejected';
-    $conn->query("UPDATE notifpesan SET status='$action' WHERE id_notif=$id");
-    header("Location: faq.php");
+session_start();
+if (!isset($_SESSION['admin'])) {
+    header('Location: ../masuk.php');
     exit;
 }
 
-$query = "SELECT u.deskripsi AS pertanyaan, u.jawaban_admin AS jawaban FROM ulasan u WHERE u.is_approved = 1 AND u.jawaban_admin IS NOT NULL";
+// Proses submit jawaban admin
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ulasan_id'], $_POST['jawaban_admin'])) {
+    $ulasan_id = intval($_POST['ulasan_id']);
+    $jawaban_admin = trim($_POST['jawaban_admin']);
+    if ($jawaban_admin !== '') {
+        $stmt = $conn->prepare("UPDATE ulasan SET jawaban_admin = ? WHERE id_ulasan = ?");
+        $stmt->bind_param("si", $jawaban_admin, $ulasan_id);
+        $stmt->execute();
+        $stmt->close();
+        // Refresh agar jawaban langsung tampil
+        header("Location: faq.php");
+        exit;
+    }
+}
+
+// Ambil data ulasan yang sudah di-approve
+$query = "SELECT u.id_ulasan, u.deskripsi AS pertanyaan, u.jawaban_admin AS jawaban 
+          FROM ulasan u 
+          WHERE u.is_approved = 1";
 $result = $conn->query($query);
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
@@ -43,8 +52,11 @@ $result = $conn->query($query);
                 Admin
             </a>
             <ul class="dropdown-menu dropdown-menu-profil" aria-labelledby="sidebarProfileDropdown">
-                <li><a class="dropdown-item" href="../Bf Login/home.php"><i class="bi bi-box-arrow-right"></i>
-                        Logout</a></li>
+                <li>
+                    <a class="dropdown-item" href="../logout.php">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </li>
             </ul>
         </div>
         <a class="nav-link" href="dashboard.php"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
@@ -70,7 +82,23 @@ $result = $conn->query($query);
                 <div id="collapse<?= $index ?>" class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>"
                     aria-labelledby="heading<?= $index ?>" data-bs-parent="#faqAccordion">
                     <div class="accordion-body">
-                        <?= nl2br(htmlspecialchars($row['jawaban'])) ?>
+                        <?php if ($row['jawaban']): ?>
+                        <div class="mb-2">
+                            <strong>Jawaban Admin:</strong><br>
+                            <?= nl2br(htmlspecialchars($row['jawaban'])) ?>
+                        </div>
+                        <?php else: ?>
+                        <form method="post" class="mt-2">
+                            <div class="mb-2">
+                                <label for="jawaban_admin_<?= $row['id_ulasan'] ?>" class="form-label">Jawaban
+                                    Admin:</label>
+                                <textarea name="jawaban_admin" id="jawaban_admin_<?= $row['id_ulasan'] ?>"
+                                    class="form-control" rows="3" required></textarea>
+                                <input type="hidden" name="ulasan_id" value="<?= $row['id_ulasan'] ?>">
+                            </div>
+                            <button type="submit" class="btn btn-success btn-sm">Kirim Jawaban</button>
+                        </form>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -79,31 +107,6 @@ $result = $conn->query($query);
             <?php else: ?>
             <p class="text-muted">Belum ada pertanyaan yang disetujui.</p>
             <?php endif; ?>
-        </div>
-
-        <div class="container mt-4">
-            <h4>Permintaan User</h4>
-            <ul class="list-group">
-                <?php while ($row = $q->fetch_assoc()): ?>
-                <li class="list-group-item">
-                    <div>
-                        <b><?= htmlspecialchars($row['username']) ?></b> (<?= htmlspecialchars($row['email']) ?>):<br>
-                        <?= $row['pesan'] ?>
-                    </div>
-                    <?php if ($row['tipe'] === 'ganti_password'): ?>
-                    <div class="text-info mt-1">Permintaan: <b>Ganti Password</b></div>
-                    <?php elseif ($row['tipe'] === 'hapus_akun'): ?>
-                    <div class="text-danger mt-1">Permintaan: <b>Hapus Akun</b></div>
-                    <?php endif; ?>
-                    <form method="post" class="mt-2 d-inline">
-                        <input type="hidden" name="id_notif" value="<?= $row['id_notif'] ?>">
-                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Setujui
-                        </button>
-                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Tolak</button>
-                    </form>
-                </li>
-                <?php endwhile; ?>
-            </ul>
         </div>
 
         <footer class="text-center mb-2 mt-5">
