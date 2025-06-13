@@ -12,10 +12,6 @@ $conn = new mysqli($host, $user, $password, $namadb, $port);
 if ($conn->connect_error) {
     die("Koneksi gagal: " . $conn->connect_error);
 }
-?>
-
-<?php
-include 'koneksi.php';
 
 // Tabel akun admin/user
 $conn->query("CREATE TABLE IF NOT EXISTS users (
