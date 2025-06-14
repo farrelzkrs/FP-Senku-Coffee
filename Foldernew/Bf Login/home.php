@@ -8,8 +8,30 @@ $poster = $conn->query("SELECT * FROM poster WHERE is_aktif=1 ORDER BY id_poster
 // Ambil 3 produk terpopuler (misal berdasarkan id_produk terbaru)
 $produk_populer = $conn->query("SELECT p.*, j.nama_jenis FROM produk p LEFT JOIN jeniskopi j ON p.jenis_kopi_id = j.id_kopi ORDER BY p.id_produk DESC LIMIT 3");
 
-// Ambil 3 ulasan terbaru yang sudah di-approve
-$ulasan = $conn->query("SELECT u.*, us.username FROM ulasan u JOIN users us ON u.user_id = us.id_users WHERE u.is_approved = 1 ORDER BY u.tanggal_ulasan DESC LIMIT 3");
+// Ambil 3 ulasan terbaik
+$ulasan = $conn->query("SELECT u.*, us.username FROM ulasan u JOIN users us ON u.user_id = us.id_users WHERE u.rating >= 4 ORDER BY u.rating DESC");
+
+// Proses kirim pertanyaan
+$pesan_sukses = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['kirim_pertanyaan'])) {
+    $pesan = trim($_POST['pesan']);
+
+    // Gunakan user yang sedang login, atau guest (misal user_id = NULL)
+    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
+    // Simpan pertanyaan ke tabel feedback
+    if ($user_id) {
+        $stmt = $conn->prepare("INSERT INTO feedback (user_id, pesan, is_approved) VALUES (?, ?, 0)");
+        $stmt->bind_param("is", $user_id, $pesan);
+    } else {
+        $stmt = $conn->prepare("INSERT INTO feedback (pesan, is_approved) VALUES (?, 0)");
+        $stmt->bind_param("s", $pesan);
+    }
+    $stmt->execute();
+    $stmt->close();
+
+    $pesan_sukses = "Pertanyaan/Keluhan Anda berhasil dikirim! Tunggu jawaban dari admin.";
+}
 ?>
 
 <!DOCTYPE html>
@@ -183,23 +205,82 @@ $ulasan = $conn->query("SELECT u.*, us.username FROM ulasan u JOIN users us ON u
         </div>
     </section>
 
-    <section id="ulasan">
+    <section id="ulasan" class="py-5 bg-light">
         <div class="container">
             <h2 class="text-center mb-5">Apa Kata Mereka?</h2>
-            <div class="row">
-                <?php while($row = $ulasan->fetch_assoc()): ?>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <blockquote class="blockquote mb-0">
-                                <p>"<?= htmlspecialchars($row['deskripsi']) ?>"</p>
-                                <footer class="blockquote-footer"><?= htmlspecialchars($row['username']) ?> <cite title="Tanggal"><?= date('d M Y', strtotime($row['tanggal_ulasan'])) ?></cite></footer>
-                            </blockquote>
+            <?php
+            // Ambil maksimal 12 ulasan terbaru
+            $ulasanResult = $conn->query("SELECT u.*, us.username FROM ulasan u JOIN users us ON u.user_id = us.id_users WHERE u.rating >= 4 ORDER BY u.rating DESC");
+            $ulasanList = [];
+            while ($row = $ulasanResult->fetch_assoc()) {
+                $ulasanList[] = $row;
+            }
+            $totalUlasan = count($ulasanList);
+            ?>
+            <?php if ($totalUlasan > 0): ?>
+            <div id="ulasanCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
+                <div class="carousel-inner">
+                    <?php
+                    $slideIndex = 0;
+                    for ($i = 0; $i < $totalUlasan; $i += 3):
+                        $active = ($slideIndex == 0) ? 'active' : '';
+                    ?>
+                    <div class="carousel-item <?= $active ?>">
+                        <div class="row justify-content-center">
+                            <?php for ($j = $i; $j < $i + 3 && $j < $totalUlasan; $j++): 
+                                $row = $ulasanList[$j];
+                            ?>
+                            <div class="col-md-4 mb-4 d-flex align-items-stretch">
+                                <div class="card h-100 w-100 p-3">
+                                    <h4 class="text-center mt-3 mb-5">"<?= htmlspecialchars($row['deskripsi']) ?>"</h4>
+                                    <h3 class="text-center fw-4">- <?= htmlspecialchars($row['username']) ?></h3>
+                                    <div class="star-display mb-2 text-center">
+                                        <?php
+                                        $rating = isset($row['rating']) ? (int)$row['rating'] : 0;
+                                        for ($k = 1; $k <= 5; $k++) {
+                                            $filled = $k <= $rating ? 'color:gold;' : 'color:#ccc;';
+                                            echo '<span style="'.$filled.'">&#9733;</span>';
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endfor; ?>
                         </div>
                     </div>
+                    <?php
+                        $slideIndex++;
+                    endfor;
+                    ?>
                 </div>
-                <?php endwhile; ?>
+                <button class="carousel-control-prev" type="button" data-bs-target="#ulasanCarousel"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#ulasanCarousel"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
             </div>
+            <script>
+            // Optional: Pause on hover, resume on mouse leave
+            const ulasanCarousel = document.getElementById('ulasanCarousel');
+            ulasanCarousel.addEventListener('mouseenter', function() {
+                const carousel = bootstrap.Carousel.getOrCreateInstance(ulasanCarousel);
+                carousel.pause();
+            });
+            ulasanCarousel.addEventListener('mouseleave', function() {
+                const carousel = bootstrap.Carousel.getOrCreateInstance(ulasanCarousel);
+                carousel.cycle();
+            });
+            </script>
+            <?php else: ?>
+            <div class="d-flex justify-content-center align-items-center" style="height:200px;">
+                <div class="card p-4 text-center">
+                    <p class="m-0">Belum ada ulasan.</p>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -263,22 +344,53 @@ $ulasan = $conn->query("SELECT u.*, us.username FROM ulasan u JOIN users us ON u
                 </div>
                 <div class="col-md-6">
                     <h4>Kirim Pertanyaan</h4>
-                    <form>
-                        <div class="mb-3">
-                            <label for="contactName" class="form-label">Nama</label>
-                            <input type="text" class="form-control" id="contactName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="contactEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="contactEmail" required>
-                        </div>
+                    <form method="post">
                         <div class="mb-3">
                             <label for="contactMessage" class="form-label">Pesan</label>
-                            <textarea class="form-control" id="contactMessage" rows="4" required></textarea>
+                            <textarea class="form-control" id="contactMessage" name="pesan" rows="4"
+                                required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-success">Kirim Pesan</button>
+                        <button type="submit" name="kirim_pertanyaan" class="btn btn-success">Kirim Pesan</button>
+                        <?php if ($pesan_sukses): ?>
+                        <div class="alert alert-success mt-3"><?= $pesan_sukses ?></div>
+                        <?php endif; ?>
                     </form>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">FAQ</h2>
+            <div class="accordion" id="faqAccordion">
+                <?php
+                $faq = $conn->query("SELECT f.pesan AS pertanyaan, f.jawaban_admin AS jawaban 
+                    FROM feedback f 
+                    WHERE f.is_approved = 1 AND f.jawaban_admin IS NOT NULL 
+                    ORDER BY f.tanggal_feedback DESC LIMIT 10");
+                if ($faq->num_rows > 0):
+                    $idx = 0;
+                    while ($row = $faq->fetch_assoc()):
+                ?>
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="heading<?= $idx ?>">
+                        <button class="accordion-button <?= $idx !== 0 ? 'collapsed' : '' ?>" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapse<?= $idx ?>"
+                            aria-expanded="<?= $idx === 0 ? 'true' : 'false' ?>" aria-controls="collapse<?= $idx ?>">
+                            <?= htmlspecialchars($row['pertanyaan']) ?>
+                        </button>
+                    </h2>
+                    <div id="collapse<?= $idx ?>" class="accordion-collapse collapse <?= $idx === 0 ? 'show' : '' ?>"
+                        aria-labelledby="heading<?= $idx ?>" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <?= nl2br(htmlspecialchars($row['jawaban'])) ?>
+                        </div>
+                    </div>
+                </div>
+                <?php $idx++; endwhile; else: ?>
+                <p class="text-muted">Belum ada pertanyaan yang dijawab admin.</p>
+                <?php endif; ?>
             </div>
         </div>
     </section>
