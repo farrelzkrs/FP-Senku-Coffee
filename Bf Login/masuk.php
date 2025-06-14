@@ -7,11 +7,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username_or_email = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    // Login admin statis
-    if ($username_or_email === 'admin' && $password === 'admin123') {
-        $_SESSION['admin'] = true;
-        header('Location: ../Admin/dashboard.php');
-        exit;
+    // Login admin dari database
+    $stmt = $conn->prepare("SELECT id_admins, username, password FROM admins WHERE username = ?");
+    $stmt->bind_param("s", $username_or_email);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows === 1) {
+        $stmt->bind_result($id_admin, $admin_username, $admin_password_hash);
+        $stmt->fetch();
+        if (password_verify($password, $admin_password_hash)) {
+            $_SESSION['admin'] = true;
+            $_SESSION['admin_username'] = $admin_username;
+            $_SESSION['admin_id'] = $id_admin;
+            $stmt->close();
+            header('Location: ../Admin/dashboard.php');
+            exit;
+        }
+        $stmt->close();
     }
 
     // Login user dari database (bisa pakai username atau email)
@@ -37,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $stmt->close();
 }
+$hash = password_hash('admin123', PASSWORD_DEFAULT);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -51,68 +65,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         crossorigin="anonymous"></script>
     <title>Masuk - Senku Coffee</title>
     <style>
-body {
-    background: #f7f7f7;
-}
+        body {
+            background: #f7f7f7;
+        }
 
-.header .p-3 {
-    background: burlywood;
-    color: #fff;
-    text-align: left;
-    font-size: 1.5rem;
-    font-weight: bold;
-    border-bottom: 10px solid #006400;
-}
+        .header .p-3 {
+            background: burlywood;
+            color: #fff;
+            text-align: left;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 10px solid #006400;
+        }
 
-.header .btn-outline-success {
-    background-color: beige;
-    border: 2px solid #28a745;
-}
+        .header .btn-outline-success {
+            background-color: beige;
+            border: 2px solid #28a745;
+        }
 
-.btn-outline-success:hover {
-    background-color: #28a745;
-    color: white;
-    border-color: #218838;
-}
+        .btn-outline-success:hover {
+            background-color: #28a745;
+            color: white;
+            border-color: #218838;
+        }
 
-.login-container {
-    max-width: 400px;
-    margin: 20px auto;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-    padding: 20px 30px 20px 30px;
-    text-align: center;
-}
+        .login-container {
+            max-width: 400px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            padding: 20px 30px 20px 30px;
+            text-align: center;
+        }
 
-.brand-logo {
-    width: 100px;
-    margin-bottom: 18px;
-}
+        .brand-logo {
+            width: 100px;
+            margin-bottom: 18px;
+        }
 
-.form-control {
-    margin-bottom: 18px;
-}
+        .form-control {
+            margin-bottom: 18px;
+        }
 
-.forgot-link,
-.register-link {
-    display: block;
-    margin-top: 10px;
-    font-size: 0.97rem;
-}
+        .forgot-link,
+        .register-link {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.97rem;
+        }
 
-.register-section {
-    margin-top: 30px;
-    border-top: 1px solid #eee;
-    padding-top: 18px;
-}
+        .register-section {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 18px;
+        }
     </style>
 </head>
 
 <body>
     <div class="header">
         <header class="p-3">
-            <button type="button" class="btn btn-outline-success" onclick="if(document.referrer){history.back();}else{window.location.href='../Bf Login/home.php';}">
+            <button type="button" class="btn btn-outline-success"
+                onclick="if(document.referrer){history.back();}else{window.location.href='../Bf Login/home.php';}">
                 &larr; Kembali
             </button>
         </header>
@@ -135,9 +150,11 @@ body {
             </form>
             <div class="register-section d-flex flex-column flex-sm-row justify-content-center align-items-center mt-3">
                 <span class="me-2 mb-1 mb-sm-0">Belum punya akun?</span>
-                <a href="daftar.php" class="me-2 mb-2 mb-0 register-link text-decoration-none text-primary">Daftar di sini</a>
+                <a href="daftar.php" class="me-2 mb-2 mb-0 register-link text-decoration-none text-primary">Daftar di
+                    sini</a>
             </div>
         </div>
     </section>
 </body>
+
 </html>
