@@ -17,6 +17,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_
 
 $query = "SELECT u.deskripsi AS pertanyaan, u.jawaban_admin AS jawaban FROM ulasan u WHERE u.is_approved = 1 AND u.jawaban_admin IS NOT NULL";
 $result = $conn->query($query);
+
+// Proses jawaban admin
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['jawab'], $_POST['id_feedback'])) {
+    $id_feedback = intval($_POST['id_feedback']);
+    $jawaban = trim($_POST['jawaban_admin']);
+    $conn->query("UPDATE feedback SET jawaban_admin='$jawaban', is_approved=1 WHERE id_feedback=$id_feedback");
+    header("Location: faq.php");
+    exit;
+}
+
+// Ambil pertanyaan yang belum dijawab
+$pending = $conn->query("SELECT f.id_feedback, f.pesan, u.username 
+    FROM feedback f 
+    JOIN users u ON f.user_id = u.id_users 
+    WHERE f.jawaban_admin IS NULL OR f.jawaban_admin = '' 
+    ORDER BY f.tanggal_feedback DESC");
 ?>
 
 <!DOCTYPE html>
@@ -100,6 +116,23 @@ $result = $conn->query($query);
                         <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Setujui
                         </button>
                         <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Tolak</button>
+                    </form>
+                </li>
+                <?php endwhile; ?>
+            </ul>
+        </div>
+
+        <div class="container mt-4">
+            <h4>Pertanyaan/Keluhan User yang Belum Dijawab</h4>
+            <ul class="list-group">
+                <?php while ($row = $pending->fetch_assoc()): ?>
+                <li class="list-group-item">
+                    <b><?= htmlspecialchars($row['username']) ?>:</b> <?= htmlspecialchars($row['pesan']) ?>
+                    <form method="post" class="mt-2">
+                        <input type="hidden" name="id_feedback" value="<?= $row['id_feedback'] ?>">
+                        <textarea name="jawaban_admin" class="form-control mb-2" placeholder="Jawab di sini..."
+                            required></textarea>
+                        <button type="submit" name="jawab" class="btn btn-success btn-sm">Jawab & Tampilkan</button>
                     </form>
                 </li>
                 <?php endwhile; ?>
