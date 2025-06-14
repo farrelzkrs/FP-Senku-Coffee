@@ -98,4 +98,15 @@ $conn->query("CREATE TABLE IF NOT EXISTS admins (
     username VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL -- simpan hash password
 )");
+
+$conn->query("CREATE TABLE IF NOT EXISTS notifpesan (
+  id_notif INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  pesan TEXT NOT NULL,
+  kode VARCHAR(16),
+  tipe ENUM('ganti_password', 'hapus_akun') NOT NULL,
+  status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES senku_coffee.users(id_users) ON DELETE CASCADE
+)");
 ?>
