@@ -10,6 +10,28 @@ $produk_populer = $conn->query("SELECT p.*, j.nama_jenis FROM produk p LEFT JOIN
 
 // Ambil 3 ulasan terbaik
 $ulasan = $conn->query("SELECT u.*, us.username FROM ulasan u JOIN users us ON u.user_id = us.id_users WHERE u.rating >= 4 ORDER BY u.rating DESC");
+
+// Proses kirim pertanyaan
+$pesan_sukses = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['kirim_pertanyaan'])) {
+    $pesan = trim($_POST['pesan']);
+
+    // Gunakan user yang sedang login, atau guest (misal user_id = NULL)
+    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
+    // Simpan pertanyaan ke tabel feedback
+    if ($user_id) {
+        $stmt = $conn->prepare("INSERT INTO feedback (user_id, pesan, is_approved) VALUES (?, ?, 0)");
+        $stmt->bind_param("is", $user_id, $pesan);
+    } else {
+        $stmt = $conn->prepare("INSERT INTO feedback (pesan, is_approved) VALUES (?, 0)");
+        $stmt->bind_param("s", $pesan);
+    }
+    $stmt->execute();
+    $stmt->close();
+
+    $pesan_sukses = "Pertanyaan/Keluhan Anda berhasil dikirim! Tunggu jawaban dari admin.";
+}
 ?>
 
 <!DOCTYPE html>
@@ -322,22 +344,53 @@ $ulasan = $conn->query("SELECT u.*, us.username FROM ulasan u JOIN users us ON u
                 </div>
                 <div class="col-md-6">
                     <h4>Kirim Pertanyaan</h4>
-                    <form>
-                        <div class="mb-3">
-                            <label for="contactName" class="form-label">Nama</label>
-                            <input type="text" class="form-control" id="contactName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="contactEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="contactEmail" required>
-                        </div>
+                    <form method="post">
                         <div class="mb-3">
                             <label for="contactMessage" class="form-label">Pesan</label>
-                            <textarea class="form-control" id="contactMessage" rows="4" required></textarea>
+                            <textarea class="form-control" id="contactMessage" name="pesan" rows="4"
+                                required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-success">Kirim Pesan</button>
+                        <button type="submit" name="kirim_pertanyaan" class="btn btn-success">Kirim Pesan</button>
+                        <?php if ($pesan_sukses): ?>
+                        <div class="alert alert-success mt-3"><?= $pesan_sukses ?></div>
+                        <?php endif; ?>
                     </form>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">FAQ</h2>
+            <div class="accordion" id="faqAccordion">
+                <?php
+                $faq = $conn->query("SELECT f.pesan AS pertanyaan, f.jawaban_admin AS jawaban 
+                    FROM feedback f 
+                    WHERE f.is_approved = 1 AND f.jawaban_admin IS NOT NULL 
+                    ORDER BY f.tanggal_feedback DESC LIMIT 10");
+                if ($faq->num_rows > 0):
+                    $idx = 0;
+                    while ($row = $faq->fetch_assoc()):
+                ?>
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="heading<?= $idx ?>">
+                        <button class="accordion-button <?= $idx !== 0 ? 'collapsed' : '' ?>" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapse<?= $idx ?>"
+                            aria-expanded="<?= $idx === 0 ? 'true' : 'false' ?>" aria-controls="collapse<?= $idx ?>">
+                            <?= htmlspecialchars($row['pertanyaan']) ?>
+                        </button>
+                    </h2>
+                    <div id="collapse<?= $idx ?>" class="accordion-collapse collapse <?= $idx === 0 ? 'show' : '' ?>"
+                        aria-labelledby="heading<?= $idx ?>" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <?= nl2br(htmlspecialchars($row['jawaban'])) ?>
+                        </div>
+                    </div>
+                </div>
+                <?php $idx++; endwhile; else: ?>
+                <p class="text-muted">Belum ada pertanyaan yang dijawab admin.</p>
+                <?php endif; ?>
             </div>
         </div>
     </section>
