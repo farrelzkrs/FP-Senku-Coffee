@@ -1,0 +1,62 @@
+body {
+    overflow-x: hidden;
+    /* Hilangkan scroll horizontal */
+}
+
+.nav-link {
+    color: rgb(0, 100, 0);
+}
+
+.nav-link:hover {
+    color: rgb(0, 0, 0) !important;
+}
+
+.nav-link.active {
+    color: rgb(0, 0, 0) !important;
+    border: 2px solid #28a745;
+    border-radius: 5px;
+    background-color: beige;
+    color: black;
+}
+
+.navbar {
+    border-bottom: 10px solid #006400;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-size: 17px;
+    font-weight: bold;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1030;
+}
+
+.navbar-nav .nav-item {
+    margin-right: 15px;
+}
+
+.btn-outline-success {
+    width: 100px;
+    height: 40px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    border: 2px solid #28a745;
+    color: #000000;
+    background-color: beige;
+    transition: all 0.3s ease;
+    margin-left: 20px;
+}
+
+.btn-outline-success:hover {
+    background-color: #28a745;
+    color: white;
+    border-color: #218838;
+}
+
+.navbar-logo {
+    height: 65px;
+    /* Sesuaikan tinggi logo dengan tinggi tulisan di navbar */
+    width: auto;
+    /* Menjaga proporsi gambar */
+}

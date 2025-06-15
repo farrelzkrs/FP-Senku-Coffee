@@ -42,10 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $allowed = ['jpg', 'jpeg', 'png', 'gif'];
         if (in_array($ext, $allowed)) {
             $gambar_baru = uniqid('produk_') . '.' . $ext;
-            move_uploaded_file($_FILES['gambar']['tmp_name'], __DIR__ . '/uploads/' . $gambar_baru);
+            move_uploaded_file($_FILES['gambar']['tmp_name'], __DIR__ . '/../uploads/' . $gambar_baru);
             // Hapus gambar lama jika ada
-            if ($gambar && file_exists(__DIR__ . '/uploads/' . $gambar)) {
-                unlink(__DIR__ . '/uploads/' . $gambar);
+            if ($gambar && file_exists(__DIR__ . '/../uploads/' . $gambar)) {
+                unlink(__DIR__ . '/../uploads/' . $gambar);
             }
             $gambar = $gambar_baru;
         } else {
@@ -156,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="number" name="harga" class="form-control" placeholder="Harga" required min="1" value="<?= $produk['harga'] ?>">
                 <textarea name="deskripsi" class="form-control" placeholder="Deskripsi Produk" rows="3" required><?= htmlspecialchars($produk['deskripsi']) ?></textarea>
                 <?php if ($produk['gambar_url']): ?>
-                    <img src="uploads/<?= htmlspecialchars($produk['gambar_url']) ?>" alt="Gambar Produk" class="img-preview">
+                    <img src="../uploads/<?= htmlspecialchars($produk['gambar_url']) ?>" alt="Gambar Produk" class="img-preview">
                 <?php endif; ?>
                 <input type="file" name="gambar" class="form-control" accept="image/*">
                 <button type="submit" class="btn btn-warning w-100 mb-2">Simpan Perubahan</button>

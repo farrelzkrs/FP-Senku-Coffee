@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $allowed = ['jpg', 'jpeg', 'png', 'gif'];
         if (in_array($ext, $allowed)) {
             $gambar_kopi = uniqid('jeniskopi_') . '.' . $ext;
-            move_uploaded_file($_FILES['gambar_kopi']['tmp_name'], __DIR__ . '/uploads/' . $gambar_kopi);
+            move_uploaded_file($_FILES['gambar_kopi']['tmp_name'], __DIR__ . '../uploads/' . $gambar_kopi);
         } else {
             $error = "Format gambar harus jpg, jpeg, png, atau gif!";
         }

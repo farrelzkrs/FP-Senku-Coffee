@@ -37,10 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $allowed = ['jpg', 'jpeg', 'png', 'gif'];
         if (in_array($ext, $allowed)) {
             $gambar_baru = uniqid('jeniskopi_') . '.' . $ext;
-            move_uploaded_file($_FILES['gambar_kopi']['tmp_name'], __DIR__ . '/uploads/' . $gambar_baru);
+            move_uploaded_file($_FILES['gambar_kopi']['tmp_name'], __DIR__ . '../uploads/' . $gambar_baru);
             // Hapus gambar lama jika ada
-            if ($gambar_kopi && file_exists(__DIR__ . '/uploads/' . $gambar_kopi)) {
-                unlink(__DIR__ . '/uploads/' . $gambar_kopi);
+            if ($gambar_kopi && file_exists(__DIR__ . '../uploads/' . $gambar_kopi)) {
+                unlink(__DIR__ . '../uploads/' . $gambar_kopi);
             }
             $gambar_kopi = $gambar_baru;
         } else {
@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" name="nama_jenis" class="form-control" placeholder="Nama Jenis Kopi" required value="<?= htmlspecialchars($jenis['nama_jenis']) ?>">
                 <textarea name="deskripsi" class="form-control" placeholder="Deskripsi Jenis Kopi" rows="3" required><?= htmlspecialchars($jenis['deskripsi']) ?></textarea>
                 <?php if ($jenis['gambar_kopi']): ?>
-                    <img src="uploads/<?= htmlspecialchars($jenis['gambar_kopi']) ?>" alt="Gambar Jenis Kopi" class="img-preview">
+                    <img src="../uploads/<?= htmlspecialchars($jenis['gambar_kopi']) ?>" alt="Gambar Jenis Kopi" class="img-preview">
                 <?php endif; ?>
                 <input type="file" name="gambar_kopi" class="form-control" accept="image/*">
                 <button type="submit" class="btn btn-warning w-100 mb-2">Simpan Perubahan</button>

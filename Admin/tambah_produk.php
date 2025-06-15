@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $allowed = ['jpg', 'jpeg', 'png', 'gif'];
         if (in_array($ext, $allowed)) {
             $gambar = uniqid('produk_') . '.' . $ext;
-            move_uploaded_file($_FILES['gambar']['tmp_name'], __DIR__ . '/uploads/' . $gambar);
+            move_uploaded_file($_FILES['gambar']['tmp_name'], __DIR__ . '/../uploads/' . $gambar);
         } else {
             $error = "Format gambar harus jpg, jpeg, png, atau gif!";
         }
